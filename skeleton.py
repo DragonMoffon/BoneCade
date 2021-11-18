@@ -32,14 +32,16 @@ class Skeleton:
         self.joints: List[Joint]
 
 
-@dataclass()
 class JointPose:
-    angles: float
-    translation: la.Vec2
+
+    def __init__(self):
+        self.angle: float
+        self.translation: la.Vec2
 
 
-@dataclass()
 class SkeletonPose:
-    skeleton: Skeleton
-    joint_poses: List[JointPose]
-    global_poses: List[la.Matrix23]
+
+    def __init__(self):
+        self.skeleton: Skeleton
+        self.joint_poses: List[JointPose]
+        self.global_poses: List[la.Matrix23]
