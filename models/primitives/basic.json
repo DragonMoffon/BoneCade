@@ -1,0 +1,91 @@
+{
+  "id": "hip",
+  "colour": [255, 255, 255],
+  "thickness": 2,
+  "pos": [0.0, 0.5],
+  "children": [
+    {
+      "id": "lower_back",
+      "colour": [255, 255, 255],
+      "thickness": 2,
+      "pos": [0.0, 0.7],
+      "children": [
+        {
+          "id": "upper_back",
+          "colour": [255, 255, 255],
+          "thickness": 2,
+          "pos": [0.0, 0.9],
+          "children": [
+            {
+              "id": "neck",
+              "colour": [255, 255, 255],
+              "thickness": 2,
+              "pos": [0.0, 1.0],
+              "children": []
+            },
+            {
+              "id": "left_upper_arm",
+              "colour": [255, 255, 255],
+              "thickness": 2,
+              "pos": [-0.3, 0.9],
+              "children": [
+                {
+                  "id": "left_forearm",
+                  "colour": [255, 255, 255],
+                  "thickness": 2,
+                  "pos": [-0.6, 0.9],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "right_upper_arm",
+              "colour": [255, 255, 255],
+              "thickness": 2,
+              "pos": [0.3, 0.9],
+              "children": [
+                {
+                  "id": "right_forearm",
+                  "colour": [255, 255, 255],
+                  "thickness": 2,
+                  "pos": [0.6, 0.9],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "left_thigh",
+      "colour": [255, 255, 255],
+      "thickness": 2,
+      "pos": [-0.1, 0.25],
+      "children": [
+        {
+          "id": "left_calf",
+          "colour": [255, 255, 255],
+          "thickness": 2,
+          "pos": [-0.1, 0.0],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "right_thigh",
+      "colour": [255, 255, 255],
+      "thickness": 2,
+      "pos": [0.1, 0.25],
+      "children": [
+        {
+          "id": "right_calf",
+          "colour": [255, 255, 255],
+          "thickness": 2,
+          "pos": [0.1, 0.0],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

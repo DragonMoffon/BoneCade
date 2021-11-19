@@ -11,37 +11,36 @@
 #
 #   An issue for later, and something that will need to be profiled.
 
+from typing import List
 
 import lin_al as la
-from dataclasses import dataclass
-from typing import List
 
 
 class Joint:
 
     def __init__(self):
-        self.inv_bind_pose_matrix: la.Matrix23
-        self.joint_name: str
-        self.parent: int
+        self.inv_bind_pose_matrix: la.Matrix33 = None
+        self.joint_name: str = None
+        self.parent: int = None
 
 
 class Skeleton:
 
     def __init__(self):
-        self.joint_count: int
-        self.joints: List[Joint]
+        self.joint_count: int = None
+        self.joints: List[Joint] = None
 
 
 class JointPose:
 
     def __init__(self):
-        self.angle: float
-        self.translation: la.Vec2
+        self.angle: float = None
+        self.translation: la.Vec2 = None
 
 
 class SkeletonPose:
 
     def __init__(self):
-        self.skeleton: Skeleton
-        self.joint_poses: List[JointPose]
-        self.global_poses: List[la.Matrix23]
+        self.skeleton: Skeleton = None
+        self.joint_poses: List[JointPose] = None
+        self.global_poses: List[la.Matrix33] = None
