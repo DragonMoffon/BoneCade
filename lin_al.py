@@ -5,6 +5,7 @@
 #
 #   Due to personal choice vectors are represented as rows, e.g., [1.0, 2.0]. This is so vector by matrix multiplication
 #   is easier to read. (left to right)
+import math
 from typing import List, Tuple
 from math import cos, sin, atan, atan2, sqrt
 
@@ -23,10 +24,11 @@ def dot_2_2(left: Tuple, right: Tuple):
 
 class Vec2:
 
-    def __init__(self, x=0, y=None, radial=False):
+    def __init__(self, x: float = 0, y=None, radial=False, point=True):
         self._radial: List[float] = [0, 0]  # Theta then Squared Length
         self._values: List[float] = [0, 0]  # X then Y
         self._x, self._y, self._theta, self._square_length = .0, .0, .0, .0
+        self.point = point
 
         if radial:
             self.radial = [x, y]
@@ -38,17 +40,26 @@ class Vec2:
 
     def __mul__(self, other):
         """
-        Dot product with vector, or 3 tuple, but reverts to matrix __rmul__ for vector - matrix multiplication
+        Dot product with vector, or 3 tuple.
         """
         if isinstance(other, Matrix33):
-            return Vec2(dot_2_3(tuple(self.values), other.column_1), dot_2_3(tuple(self.values), other.column_2))
+            return Vec2(dot_3_3(tuple([*self.values, self.point]), other.column_1),
+                        dot_3_3(tuple([*self.values, self.point]), other.column_2))
         elif isinstance(other, Vec2):
             return self.x*other.x + self.y*other.y
         elif isinstance(other, Tuple):
             result = self.x*other[0] + self.y*other[1]
             if len(other) > 2:
                 result += other[2]
-            return  result
+            return result
+        else:
+            return Vec2(self._x*other, self._y*other)
+
+    def __add__(self, other):
+        if isinstance(other, Vec2):
+            return Vec2(self.x + other.x, self.y + other.y)
+        else:
+            return Vec2(self.x + other, self.y + other)
 
     @property
     def x(self):
@@ -88,6 +99,14 @@ class Vec2:
         self._values = [self._x, self._y]
 
     @property
+    def square_length(self):
+        return self._square_length
+
+    @square_length.setter
+    def square_length(self, value: float):
+        self.radial = [self._theta, value]
+
+    @property
     def radial(self):
         return self._radial
 
@@ -107,12 +126,14 @@ class Vec2:
         self._values = list(value)
         self._x, self._y = value
         self._theta = atan2(self._y, self._x)
+        if self._theta < 0:
+            self._theta += 2*math.pi
         self._square_length = self._x**2 + self._y**2
 
 
 class Matrix33:
 
-    def __init__(self, values):
+    def __init__(self, values: List[float] = (1, 0, 0, 0, 1, 0, 0, 0, 1)):
         self.values: List[float] = values
 
     @staticmethod
@@ -156,8 +177,8 @@ class Matrix33:
 
         return Matrix33([
             rot_cos*(1/scale.x),  -rot_sin*(1/scale.x), 0,
-            rot_sin*(1/scale.y),  rot_cos*(1/scale.y), 0,
-            -translate.x,         -translate.y,        1])
+            rot_sin*(1/scale.y),  rot_cos*(1/scale.y),  0,
+            -translate.x,         -translate.y,         1])
 
     @staticmethod
     def lazy_inverse(matrix):
@@ -170,7 +191,11 @@ class Matrix33:
 
         scale_x = Vec2(matrix[0], matrix[1]).length
         scale_y = Vec2(matrix[3], matrix[4]).length
-        rotation_angle = atan(matrix[1]/matrix[0])
+        if matrix[1] != 0:
+            rotation_angle = atan2(matrix[1], matrix[0])
+        else:
+            rotation_angle = 0
+
         translation = Vec2(matrix[6], matrix[7])
 
         rotation_cos = cos(rotation_angle)
@@ -189,6 +214,9 @@ class Matrix33:
             v[0], v[3], v[6],
             v[1], v[4], v[7],
             v[2], v[5], v[8]])
+
+    def __getitem__(self, item):
+        return self.values[item]
 
     @property
     def column_1(self):
