@@ -6,8 +6,8 @@
 #   render engine.
 #
 #   This leaves most of the joint calculations on the CPU. Since there is no proper support for compute shaders within
-#   arcade this may be the largest bottleneck. I could send stripped down joint data along to the render engine. This
-#   would allow me to construct the final model space to world space matrices in the vertex shader.
+#   arcade this may be the largest bottleneck. I could send stripped down joint data along to the render engine.
+#   This would allow me to construct the final model space to world space matrices in the vertex shader.
 #
 #   An issue for later, and something that will need to be profiled.
 
@@ -15,8 +15,10 @@ from typing import List, Dict
 from copy import deepcopy
 import json
 
-import lin_al as la
 import arcade
+
+import lin_al as la
+from memory import cache
 
 
 class Joint:
@@ -70,13 +72,7 @@ def create_skeleton(file, target, cache_imperative=1):
         make_skeleton_joint(joint_list, 0, child_data)
 
     skeleton = Skeleton(joint_list, json_data['name'])
-
-    if cache_imperative == 1:
-        skeleton_cache[json_data['name']] = skeleton
-    elif cache_imperative == 2:
-        skeleton_cache[json_data['name']] = deepcopy(skeleton)
-    elif cache_imperative != 0:
-        print("unknown cache imperative the skeleton will not be cached")
+    cache(skeleton, json_data['name'], skeleton_cache, cache_imperative)
 
     return skeleton
 
@@ -182,11 +178,6 @@ def get_pose(file, target_pose, cache_imperative: int = 1):
         model_poses.append(current_matrix)
 
     pose = SkeletonPose(skeleton, joint_poses, model_poses)
-    if cache_imperative == 1:
-        pose_cache[target_pose] = pose
-    elif cache_imperative == 2:
-        pose_cache[target_pose] = deepcopy(pose)
-    elif cache_imperative != 0:
-        print("unknown cache imperative the pose will not be cached")
+    cache(pose, target_pose, pose_cache, cache_imperative)
 
     return pose

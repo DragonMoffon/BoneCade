@@ -7,7 +7,7 @@
 #   is easier to read. (left to right)
 import math
 from typing import List, Tuple
-from math import cos, sin, atan, atan2, sqrt
+from math import cos, sin, atan2, sqrt
 
 
 def dot_3_3(left: Tuple, right: Tuple):

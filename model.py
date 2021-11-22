@@ -1,9 +1,10 @@
 import json
-from typing import List
+from typing import List, Dict
 
 import arcade
 
 import lin_al as la
+from memory import cache
 
 
 # -- PRIMITIVE MODELS --
@@ -44,15 +45,6 @@ class PrimitiveModel:
     def update_world_matrix(self):
         self.world_matrix = la.Matrix33.all_matrix(self._pos, self._scale, self._rotation)
 
-    def draw(self):
-        for primitive in self.segment_list:
-            point_one = primitive.model_view_pos * self.world_matrix
-            if primitive.parent_primitive_index != -1:
-                point_two = self.segment_list[primitive.parent_primitive_index].model_view_pos * self.world_matrix
-                arcade.draw_line(point_one.x, point_one.y, point_two.x, point_two.y,
-                                 primitive.colour, primitive.thickness)
-            arcade.draw_point(point_one.x, point_one.y, primitive.colour, 5)
-
     def reposition(self, new_pos, new_scale, new_rotation):
         self._pos = new_pos
         self._scale = new_scale
@@ -88,6 +80,9 @@ class PrimitiveModel:
         self.update_world_matrix()
 
 
+prim_cache: Dict[str, PrimitiveModel] = {}
+
+
 def make_prim_segment(joint_list: List[SegmentPrimitive], parent_index: int, joint_data: dict):
     """
     Recursive generation of Joint Primitive.
@@ -103,13 +98,15 @@ def make_prim_segment(joint_list: List[SegmentPrimitive], parent_index: int, joi
         make_prim_segment(joint_list, new_joint.segment_index, child_data)
 
 
-def create_primitive_model(file, position=la.Vec2(0), rotation=0):
+def create_primitive_model(file, position=la.Vec2(0), rotation=0, cache_imperative=1):
     """
     Generates a positioned 2D Primitive Model from a json file.
 
     :param file: a json file in a parent->child joint tree.
     :param position: 2D position vector
     :param rotation: the rotation of the model in radians (from the model's origin which may not be it's center)
+    :param cache_imperative: the cache imperative. This decides whether the model should be cached.
+     0 = don't cache, 1 = cache and return, 2 = cache copy and return.
     :return: a 2D primitive Model
     """
     json_data = json.load(open(file))
@@ -119,8 +116,9 @@ def create_primitive_model(file, position=la.Vec2(0), rotation=0):
     for child_data in json_data["children"]:
         make_prim_segment(joint_list, master_segment.segment_index, child_data)
 
-    return PrimitiveModel(joint_list, position, rotation, json_data['name'])
-
+    model = PrimitiveModel(joint_list, position, rotation, json_data['name'])
+    cache(model, json_data['name'], prim_cache, cache_imperative)
+    return model
 
 # -- SPRITE MODEL --
 # This implementation uses multiple separate sprites to draw the model.

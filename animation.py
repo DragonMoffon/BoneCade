@@ -110,29 +110,26 @@ class Animation:
         self.current_time = (GAME_CLOCK.run_time - self.start_time) * self.playback / self.clip.duration
         self.loop_num = math.floor(self.current_time) + 1
 
-    def get_pose(self):
+    def frame_t(self):
         self.current_time = (GAME_CLOCK.run_time - self.start_time) * self.playback / self.clip.duration
         if self.loop_num >= 0:
-            t = clamp(self.current_time, 0, self.loop_num) % 1
-        else:
-            t = self.current_time % 1
+            return clamp(self.current_time, 0, self.loop_num) % 1
+        return self.current_time % 1
 
-        sample = t * self.clip.frame_count
+    def get_pose(self):
+        sample = self.frame_t() * self.clip.frame_count
         last_frame = math.floor(sample)
         next_frame = (last_frame + 1) % self.clip.frame_count
 
         next_weight = sample % 1
         last_weight = 1 - next_weight
 
-        print(last_frame)
-
         poses = []
         model_poses = []
         for index, last_pose in enumerate(self.clip.frames[last_frame].joint_poses):
             next_pose = self.clip.frames[next_frame].joint_poses[index]
 
-            last_vec = Vec2(last_pose.angle, 1, True)
-            next_vec = Vec2(next_pose.angle, 1, True)
+            last_vec, next_vec = Vec2(last_pose.angle, 1, True), Vec2(next_pose.angle, 1, True)
 
             true_angle = lerp(last_vec, next_vec, next_weight).theta
             true_translation = last_pose.translation * last_weight + next_pose.translation * next_weight
@@ -146,9 +143,9 @@ class Animation:
             else:
                 last_matrix = Matrix33()
 
-            model_matrix = true_pose.to_matrix() * last_matrix
-            model_poses.append(model_matrix)
-        return skeleton.SkeletonPose(self.clip.skeleton, poses, model_poses)
+            model_poses.append(true_pose.to_matrix() * last_matrix)
+
+        return model_poses
 
     def is_done(self):
         if self.loop_num != -1 and self.current_time >= self.loop_num:
