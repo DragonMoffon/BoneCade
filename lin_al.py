@@ -39,9 +39,6 @@ class Vec2:
                 self.values: List[float] = [x, y]
 
     def __mul__(self, other):
-        """
-        Dot product with vector, or 3 tuple.
-        """
         if isinstance(other, Matrix33):
             return Vec2(dot_3_3(tuple([*self.values, self.point]), other.column_1),
                         dot_3_3(tuple([*self.values, self.point]), other.column_2))
@@ -54,6 +51,9 @@ class Vec2:
             return result
         else:
             return Vec2(self._x*other, self._y*other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
 
     def __add__(self, other):
         if isinstance(other, Vec2):
@@ -129,6 +129,10 @@ class Vec2:
         if self._theta < 0:
             self._theta += 2*math.pi
         self._square_length = self._x**2 + self._y**2
+
+
+def lerp(a: Vec2, b: Vec2, transition) -> Vec2:
+    return (1-transition)*a + transition*b
 
 
 class Matrix33:

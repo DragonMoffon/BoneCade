@@ -6,7 +6,7 @@ from typing import List, Dict
 
 from clock import GAME_CLOCK
 from global_access import clamp
-from lin_al import Matrix33
+from lin_al import Matrix33, Vec2, lerp
 
 
 class FramePose:
@@ -131,13 +131,10 @@ class Animation:
         for index, last_pose in enumerate(self.clip.frames[last_frame].joint_poses):
             next_pose = self.clip.frames[next_frame].joint_poses[index]
 
-            last_angle = last_pose.angle
-            # if next_pose.angle - last_angle > 180:
-            #    last_angle += 2 * math.pi
+            last_vec = Vec2(last_pose.angle, 1, True)
+            next_vec = Vec2(next_pose.angle, 1, True)
 
-            # TODO: fix the spinning leg issue. Then push the dev branch into the main.
-
-            true_angle = last_angle * last_weight + next_pose.angle * next_weight
+            true_angle = lerp(last_vec, next_vec, next_weight).theta
             true_translation = last_pose.translation * last_weight + next_pose.translation * next_weight
 
             true_pose = skeleton.JointPose(true_angle, true_translation.x, true_translation.y)

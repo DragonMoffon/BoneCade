@@ -44,7 +44,7 @@ class Window(arcade.Window):
         self.test_prim_entity = bone_entity.PrimitiveSkinnedEntity(entity_skeleton, entity_model, self.floating_pose)
         animation.generate_clips("poses/animations/basic_motion.json", 'run')
 
-        self.test_prim_entity.animation_set.add_animation('run', 1, GAME_CLOCK.run_time, -1, 0.01)
+        self.test_prim_entity.animation_set.add_animation('run', 1, GAME_CLOCK.run_time, -1, 1/2)
 
         self.saved_poses: List[skeleton.SkeletonPose] = []
 
@@ -70,6 +70,8 @@ class Window(arcade.Window):
             i += 1
 
         self.test_prim_entity.draw()
+        arcade.draw_text(f"time elapsed: {GAME_CLOCK.run_time}s, run speed: {GAME_CLOCK.run_speed}",
+                         SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 200, anchor_x='center')
 
         if not GAME_CLOCK.is_counting:
             arcade.draw_text(f"PAUSED - time elapsed since last pause: {GAME_CLOCK.concurrent_run_time}s",
@@ -90,6 +92,10 @@ class Window(arcade.Window):
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
             GAME_CLOCK.toggle()
+        elif symbol == arcade.key.EQUAL:
+            GAME_CLOCK.run_speed += 0.1
+        elif symbol == arcade.key.MINUS:
+            GAME_CLOCK.run_speed -= 0.1
         elif symbol == arcade.key.SPACE:
             pass
             # self.save_current_pose()
