@@ -6,6 +6,7 @@ from typing import List
 
 import bone_entity
 import skeleton
+import animation
 from clock import GAME_CLOCK
 from global_access import SCREEN_WIDTH, SCREEN_HEIGHT
 from lin_al import Vec2, Matrix33
@@ -18,7 +19,7 @@ import model
 # implement.
 # Aims:
 #   bone/joint tree structure linked to arcade.Sprites
-#   global clock animation system (global start times, not integer frame counts, LERP animations)
+#   global clock animation system (global start times, not integer frame counts, LERP animations) DONE
 #   Blending between animations e.g. running to walking to standing.
 #   multi-animation blending (shooting while running, using blending to look left, right, up, down)
 #   vertex weighted bone/joint system. openGl integration
@@ -41,6 +42,10 @@ class Window(arcade.Window):
         self.floating_pose = skeleton.get_pose("poses/basic_poses.json", "t_pose", 2)
         self.selected_joint = -1
         self.test_prim_entity = bone_entity.PrimitiveSkinnedEntity(entity_skeleton, entity_model, self.floating_pose)
+        animation.generate_clips("poses/animations/basic_motion.json", 'run')
+
+        self.test_prim_entity.animation_set.add_animation('run', 1, GAME_CLOCK.run_time, -1, 0.01)
+
         self.saved_poses: List[skeleton.SkeletonPose] = []
 
         self.rect_pos = Vec2(0, SCREEN_HEIGHT/2)
@@ -74,11 +79,11 @@ class Window(arcade.Window):
         saved_pose = deepcopy(self.floating_pose)
         self.saved_poses.append(saved_pose)
 
-    def save_animation(self):
-        pass
+    def save_current_animation(self):
+        target_skeleton = self.saved_poses[0].skeleton.skeleton_id
+        animation.convert_clip(self.saved_poses, 'run', True, 1/30)
 
-    def on_close(self):
-        self.save_animation()
+        animation.save_clips("poses/animations/basic_motion.json", target_skeleton, ['run'])
 
     # -- BUTTON EVENTS --
 
@@ -86,7 +91,11 @@ class Window(arcade.Window):
         if symbol == arcade.key.ESCAPE:
             GAME_CLOCK.toggle()
         elif symbol == arcade.key.SPACE:
-            self.save_current_pose()
+            pass
+            # self.save_current_pose()
+        elif symbol == arcade.key.ENTER:
+            pass
+            # self.save_current_animation()
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         closest_joint = self.test_prim_entity.last_world_space_joints[0]
@@ -130,9 +139,8 @@ class Window(arcade.Window):
 
             after_angle = self.floating_pose.joint_poses[self.selected_joint].translation.theta
 
-            self.floating_pose.joint_poses[self.selected_joint].angle += after_angle - pose_angle
-
-            # TODO: allow a joint to be positioned while keeping a constant length.
+            if joint_parent_index != -1:
+                self.floating_pose.joint_poses[self.selected_joint].angle += after_angle - pose_angle
         else:
             motion = Vec2(dx, 0, point=False)
             self.rect_pos += motion

@@ -9,48 +9,64 @@
       "id": "lower_back",
       "colour": [255, 69, 0],
       "thickness": 2,
-      "pos": [0.0, 0.7],
+      "pos": [0.0, 0.625],
       "children": [
         {
           "id": "upper_back",
           "colour": [255, 69, 0],
           "thickness": 2,
-          "pos": [0.0, 0.9],
+          "pos": [0.0, 0.84375],
           "children": [
             {
               "id": "neck",
               "colour": [255, 69, 0],
               "thickness": 2,
-              "pos": [0.0, 1.0],
+              "pos": [0.0, 0.875],
               "children": []
             },
             {
               "id": "left_upper_arm",
-              "colour": [255, 69, 0],
+              "colour": [26, 205, 15],
               "thickness": 2,
-              "pos": [-0.25, 0.9],
+              "pos": [0.21875, 0.84375],
               "children": [
                 {
                   "id": "left_forearm",
-                  "colour": [255, 69, 0],
+                  "colour": [26, 205, 15],
                   "thickness": 2,
-                  "pos": [-0.5, 0.9],
-                  "children": []
+                  "pos": [0.376, 0.84375],
+                  "children": [
+                    {
+                      "id": "left_hand",
+                      "colour": [26, 205, 15],
+                      "thickness": 2,
+                      "pos": [0.46975, 0.84375],
+                      "children": []
+                    }
+                  ]
                 }
               ]
             },
             {
               "id": "right_upper_arm",
-              "colour": [255, 69, 0],
+              "colour": [205, 26, 15],
               "thickness": 2,
-              "pos": [0.25, 0.9],
+              "pos": [-0.21875, 0.84375],
               "children": [
                 {
                   "id": "right_forearm",
-                  "colour": [255, 69, 0],
+                  "colour": [205, 26, 15],
                   "thickness": 2,
-                  "pos": [0.5, 0.9],
-                  "children": []
+                  "pos": [-0.376, 0.84375],
+                  "children": [
+                    {
+                      "id": "right_hand",
+                      "colour": [205, 26, 15],
+                      "thickness": 2,
+                      "pos": [-0.46975, 0.84375],
+                      "children": []
+                    }
+                  ]
                 }
               ]
             }
@@ -60,30 +76,30 @@
     },
     {
       "id": "left_thigh",
-      "colour": [255, 69, 0],
+      "colour": [205, 26, 15],
       "thickness": 2,
-      "pos": [-0.1, 0.25],
+      "pos": [0.0, 0.25],
       "children": [
         {
           "id": "left_calf",
-          "colour": [255, 69, 0],
+          "colour": [205, 26, 15],
           "thickness": 2,
-          "pos": [-0.1, 0.0],
+          "pos": [0.0, 0.0],
           "children": []
         }
       ]
     },
     {
       "id": "right_thigh",
-      "colour": [255, 69, 0],
+      "colour": [26, 205, 15],
       "thickness": 2,
-      "pos": [0.1, 0.25],
+      "pos": [0.0, 0.25],
       "children": [
         {
           "id": "right_calf",
-          "colour": [255, 69, 0],
+          "colour": [26, 205, 15],
           "thickness": 2,
-          "pos": [0.1, 0.0],
+          "pos": [0.0, 0.0],
           "children": []
         }
       ]

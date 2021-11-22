@@ -4,3 +4,5 @@
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 
 
+def clamp(val, min_x, max_x):
+    return min(max(val, min_x), max_x)

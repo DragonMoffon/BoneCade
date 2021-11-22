@@ -16,9 +16,10 @@ class PrimitiveSkinnedEntity:
         self.skeleton: skeleton.Skeleton = entity_skeleton
         self.model: model.PrimitiveModel = entity_model
         self.current_pose: skeleton.SkeletonPose = entity_pose
+        self.animation_set: animation.AnimationSet = animation.AnimationSet()
         self.last_world_space_joints = []
 
-    def draw(self):
+    def pose_draw(self):
         index = 0
         world_space_joints = []
         while index < len(self.skeleton.joints):
@@ -38,6 +39,33 @@ class PrimitiveSkinnedEntity:
 
             world_space_joints.append(current_point)
 
+            index += 1
+
+        self.last_world_space_joints = world_space_joints
+
+    def draw(self):
+        index = 0
+        poses, weights = self.animation_set.get_poses()
+
+        world_space_joints = []
+        while index < len(self.skeleton.joints):
+            inverse_matrix = self.skeleton.joints[index].inv_bind_pose_matrix
+
+            primitive_segment = self.model.segment_list[index]
+
+            final_point = la.Vec2(0)
+            for k, pose in enumerate(poses):
+                joint_pose = pose.model_poses[index]
+                skinning_matrix = inverse_matrix * joint_pose
+                final_point += primitive_segment.model_view_pos * skinning_matrix * self.model.world_matrix * weights[k]
+
+            if primitive_segment.parent_primitive_index != -1:
+                parent_point = world_space_joints[primitive_segment.parent_primitive_index]
+                arcade.draw_line(final_point.x, final_point.y, parent_point.x, parent_point.y,
+                                 primitive_segment.colour, primitive_segment.thickness)
+            arcade.draw_point(final_point.x, final_point.y, primitive_segment.colour, primitive_segment.thickness*2)
+
+            world_space_joints.append(final_point)
             index += 1
 
         self.last_world_space_joints = world_space_joints
