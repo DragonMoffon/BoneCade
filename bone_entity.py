@@ -62,3 +62,4 @@ def create_sample_prim_entity():
 
     sample_prim = PrimitiveSkinnedEntity(entity_skeleton, entity_model)
     sample_prim.animation_set.add_animation('run', 1, GAME_CLOCK.run_time, -1, 1/2)
+    return sample_prim

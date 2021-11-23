@@ -10,6 +10,7 @@ from lin_al import Vec2
 # It is in no way expected to be usable without modification, but should hopefully give a basic method for others to
 # implement.
 
+
 class SampleScene(arcade.Window):
 
     def __init__(self):

@@ -59,7 +59,7 @@ def generate_clip(clip_data: dict, target_skeleton):
 
 def generate_clips(file, target):
     json_data = json.load(open(file))
-    target_skeleton = skeleton.create_skeleton(f"skeletons/{json_data['target']}.json", json_data['target'])
+    target_skeleton = skeleton.create_skeleton(f"resources/skeletons/{json_data['target']}.json", json_data['target'])
     for clip in json_data['clips']:
         generate_clip(clip, target_skeleton)
 
