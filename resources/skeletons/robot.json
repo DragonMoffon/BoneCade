@@ -1,0 +1,156 @@
+{
+  "name": "basic",
+  "id": "pelvis",
+  "matrix": [
+    1, 0,    0,
+    0, 1,    0,
+    0, -0.5, 1
+  ],
+  "children": [
+    {
+      "id": "spine",
+      "matrix": [
+        1, 0, 0,
+        0, 1, 0,
+        0, -0.625, 1
+      ],
+      "children": [
+        {
+          "id": "shoulder",
+          "matrix": [
+            1, 0, 0,
+            0, 1, 0,
+            0, -0.84375, 1
+          ],
+          "children": [
+            {
+              "id": "left_elbow",
+              "matrix": [
+                1, 0, 0,
+                0, 1, 0,
+                -0.21875, -0.84375, 1
+              ],
+              "children": [
+                {
+                  "id": "left_wrist",
+                  "matrix": [
+                    1, 0, 0,
+                    0, 1, 0,
+                    -0.376, -0.84375, 1
+                  ],
+                  "children": [
+                    {
+                      "id": "left_finger_tip",
+                      "matrix": [
+                        1, 0, 0,
+                        0, 1, 0,
+                        -0.46975, -0.84375, 1
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "head",
+              "matrix": [
+                1, 0, 0,
+                0, 1, 0,
+                0, -0.875, 1
+              ],
+              "children": []
+            },
+            {
+              "id": "right_elbow",
+              "matrix": [
+                1, 0, 0,
+                0, 1, 0,
+                0.25, -0.84375, 1
+              ],
+              "children": [
+                {
+                  "id": "right_wrist",
+                  "matrix": [
+                    1, 0, 0,
+                    0, 1, 0,
+                    0.376, -0.84375, 1
+                  ],
+                  "children": [
+                    {
+                      "id": "right_finger_tip",
+                      "matrix": [
+                        1, 0, 0,
+                        0, 1, 0,
+                        0.46975, -0.84375, 1
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "left_knee",
+      "matrix": [
+        1, 0, 0,
+        0, 1, 0,
+        0, -0.25, 1
+      ],
+      "children": [
+        {
+          "id": "left_ankle",
+          "matrix": [
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+          ],
+          "children": [
+            {
+              "id": "left_toes",
+              "matrix": [
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "right_knee",
+      "matrix": [
+        1, 0, 0,
+        0, 1, 0,
+        0, -0.25, 1
+      ],
+      "children": [
+        {
+          "id": "right_ankle",
+          "matrix": [
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+          ],
+          "children": [
+            {
+              "id": "right_toes",
+              "matrix": [
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

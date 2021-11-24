@@ -16,8 +16,6 @@ multi-animation blending (shooting while running, using blending to look left, r
 # Systems to build.
 Sprite Model.\
 Mesh Model.\
-Refactor Entity. Split rendering from rest.\
-Refactor Model. Split into model and transform.\
 Create different Windows. 
 * Sample Scene
 * Simple Animator
