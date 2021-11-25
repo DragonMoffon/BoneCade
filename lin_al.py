@@ -55,11 +55,26 @@ class Vec2:
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __rdiv__(self, other):
+        return Vec2(other/self.x, other/self.y)
+
     def __add__(self, other):
         if isinstance(other, Vec2):
             return Vec2(self.x + other.x, self.y + other.y)
         else:
             return Vec2(self.x + other, self.y + other)
+
+    def __sub__(self, other):
+        if isinstance(other, Vec2):
+            return Vec2(self.x - other.x, self.y - other.y)
+        else:
+            return Vec2(self.x - other, self.y - other)
+
+    def __neg__(self):
+        return Vec2(-self.x, -self.y)
+
+    def item_mul(self, other):
+        return Vec2(self.x * other.x, self.y * other.y)
 
     @property
     def x(self):
@@ -172,17 +187,14 @@ class Matrix33:
         return Matrix33([
             rot_cos*scale.x,  rot_sin*scale.x, 0,
             -rot_sin*scale.y, rot_cos*scale.y, 0,
-            translate.x,         translate.y,         1])
+            translate.x,         translate.y,  1])
 
     @staticmethod
     def inverse_all_matrix(translate: Vec2 = Vec2(0), scale: Vec2 = Vec2(1), angle: float = 0):
-        rot_cos = cos(angle)
-        rot_sin = sin(angle)
-
-        return Matrix33([
-            rot_cos*(1/scale.x),  -rot_sin*(1/scale.x), 0,
-            rot_sin*(1/scale.y),  rot_cos*(1/scale.y),  0,
-            -translate.x,         -translate.y,         1])
+        inv_scale = Vec2(1/scale.x, 1/scale.y)
+        return (Matrix33.translation_matrix(-translate) *
+                Matrix33.rotation_matrix(-angle) *
+                Matrix33.scale_matrix(inv_scale))
 
     @staticmethod
     def lazy_inverse(matrix):
@@ -201,15 +213,11 @@ class Matrix33:
             rotation_angle = 0
 
         translation = Vec2(matrix[6], matrix[7])
+        scale = Vec2(1/scale_x, 1/scale_y)
 
-        rotation_cos = cos(rotation_angle)
-        rotation_sin = sin(rotation_angle)
-
-        return Matrix33([
-            1/scale_x * rotation_cos, 1/scale_x * -rotation_sin, 0,
-            1/scale_y * rotation_sin, 1/scale_y * rotation_cos,  0,
-            -translation.x,           -translation.y,            1
-        ])
+        return (Matrix33.translation_matrix(-translation) *
+                Matrix33.rotation_matrix(-rotation_angle) *
+                Matrix33.scale_matrix(scale))
 
     @staticmethod
     def transpose_matrix(matrix):
@@ -254,3 +262,13 @@ class Matrix33:
          dot_3_3(self.row_1, other.column_1), dot_3_3(self.row_1, other.column_2), dot_3_3(self.row_1, other.column_3),
          dot_3_3(self.row_2, other.column_1), dot_3_3(self.row_2, other.column_2), dot_3_3(self.row_2, other.column_3),
          dot_3_3(self.row_3, other.column_1), dot_3_3(self.row_3, other.column_2), dot_3_3(self.row_3, other.column_3)])
+
+
+class RotTrans:
+
+    def __init__(self, angle, trans_x, trans_y):
+        self.angle: float = angle
+        self.translation: Vec2 = Vec2(trans_x, trans_y)
+
+    def to_matrix(self):
+        return Matrix33.all_matrix(self.translation, Vec2(1), self.angle)

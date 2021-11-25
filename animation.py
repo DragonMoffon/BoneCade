@@ -1,6 +1,7 @@
 import json
 import math
 
+import lin_al
 import skeleton
 from typing import List, Dict
 
@@ -17,7 +18,7 @@ class FramePose:
     """
 
     def __init__(self, joint_poses):
-        self.joint_poses: List[skeleton.JointPose] = joint_poses
+        self.joint_poses: List[lin_al.RotTrans] = joint_poses
         meta_data = None
 
 
@@ -43,7 +44,7 @@ clip_cache: Dict[str, Clip] = {}
 def generate_frame(frame_data: List[List[float]]):
     frame_poses = []
     for pose_data in frame_data:
-        pose = skeleton.JointPose(*pose_data)
+        pose = lin_al.RotTrans(*pose_data)
         frame_poses.append(pose)
 
     return FramePose(frame_poses)
@@ -63,7 +64,8 @@ def generate_clips(file, target):
     for clip in json_data['clips']:
         generate_clip(clip, target_skeleton)
 
-    return clip_cache[target]
+    if target is not None:
+        return clip_cache[target]
 
 
 def convert_clip(poses: List[skeleton.SkeletonPose], clip_id: str, loop: bool, fps: float):
@@ -134,7 +136,7 @@ class Animation:
             true_angle = lerp(last_vec, next_vec, next_weight).theta
             true_translation = last_pose.translation * last_weight + next_pose.translation * next_weight
 
-            true_pose = skeleton.JointPose(true_angle, true_translation.x, true_translation.y)
+            true_pose = lin_al.RotTrans(true_angle, true_translation.x, true_translation.y)
             poses.append(true_pose)
 
             joint_parent = self.clip.skeleton.joints[index].parent

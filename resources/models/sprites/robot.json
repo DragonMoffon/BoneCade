@@ -9,38 +9,38 @@
       "id": "lower_back",
       "piece_data": [80, 50, 30, 30],
       "position": [0.0, 0.453125, 0.0],
-      "rotation": 0,
+      "target_joint": 1,
       "children": [
         {
           "id": "upper_back",
-          "piece_data": [195, 0, 45, 90],
+          "piece_data": [0, 175, 90, 40],
           "position": [-0.015625, 0.609375, 0.0],
-          "rotation": 0,
+          "target_joint": 2,
           "children": [
             {
               "id": "head",
-              "piece_data": [0, 0, 45, 70],
+              "piece_data": [0, 0, 65, 45],
               "position": [0.0, 0.75, 0.0],
-              "rotation": 0,
+              "target_joint": 3,
               "children": []
             },
             {
               "id": "left_upper_arm",
-              "piece_data": [80, 80, 55, 70],
+              "piece_data": [0, 115, 70, 55],
               "position": [0.046875, 0.59375, -0.2],
-              "rotation": 90,
+              "target_joint": 4,
               "children": [
                 {
                   "id": "left_forearm",
-                  "piece_data": [80, 160, 45, 65],
+                  "piece_data": [75, 125, 65, 45],
                   "position": [0.203125, 0.59375, -0.21],
-                  "rotation": 90,
+                  "target_joint": 5,
                   "children": [
                     {
                       "id": "left_hand",
-                      "piece_data": [135, 50, 25, 30],
+                      "piece_data": [130, 30, 30, 25],
                       "position": [0.3125, 0.625, -0.22],
-                      "rotation": 90,
+                      "target_joint": 6,
                       "children": []
                     }
                   ]
@@ -49,21 +49,21 @@
             },
             {
               "id": "right_upper_arm",
-              "piece_data": [0, 80, 55, 70],
+              "piece_data": [0, 55, 70, 55],
               "position": [-0.046875, 0.65625, 0.2],
-              "rotation": -90,
+              "target_joint": 7,
               "children": [
                 {
                   "id": "right_forearm",
-                  "piece_data": [0, 160, 45, 65],
+                  "piece_data": [75, 80, 65, 45],
                   "position": [-0.203125, 0.65625, 0.21],
-                  "rotation": -90,
+                  "target_joint": 8,
                   "children": [
                     {
                       "id": "right_hand",
-                      "piece_data": [135, 0, 25, 30],
+                      "piece_data": [130, 0, 30, 25],
                       "position": [-0.3125, 0.625, 0.22],
-                      "rotation": -90,
+                      "target_joint": 9,
                       "children": []
                     }
                   ]
@@ -76,21 +76,21 @@
     },
     {
       "id": "left_thigh",
-      "piece_data": [240, 80, 40, 100],
+      "piece_data": [140, 110, 100, 40],
       "position": [0.0, 0.358375, -0.1],
-      "rotation": 0,
+      "target_joint": 10,
       "children": [
         {
           "id": "left_calf",
-          "piece_data": [290, 165, 30, 75],
+          "piece_data": [165, 35, 75, 30],
           "position": [-0.015625, 0.171875, -0.11],
-          "rotation": 0,
+          "target_joint": 11,
           "children": [
             {
               "id": "left_foot",
               "piece_data": [80, 25, 40, 20],
-              "position": [0.015625, 0.015625, -0.12],
-              "rotation": 0,
+              "position": [-0.015625, 0.015625, -0.12],
+              "target_joint": 12,
               "children": []
             }
           ]
@@ -99,21 +99,21 @@
     },
     {
       "id": "right_thigh",
-      "piece_data": [160, 80, 40, 100],
+      "piece_data": [140, 70, 100, 40],
       "position": [0.0, 0.358375, 0.1],
-      "rotation": 0,
+      "target_joint": 13,
       "children": [
         {
           "id": "right_calf",
-          "piece_data": [210, 165, 30, 75],
+          "piece_data": [165, 35, 75, 30],
           "position": [-0.015625, 0.171875, 0.11],
-          "rotation": 0,
+          "target_joint": 14,
           "children": [
             {
               "id": "right_foot",
               "piece_data": [80, 0, 40, 20],
-              "position": [0.015625, 0.015625, 0.12],
-              "rotation": 0,
+              "position": [-0.015625, 0.015625, 0.12],
+              "target_joint": 15,
               "children": []
             }
           ]

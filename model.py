@@ -1,6 +1,5 @@
 import json
-import math
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 import arcade
 
@@ -83,23 +82,13 @@ def create_primitive_model(file, cache_imperative=1):
 # saves on a little bit of memory (smaller, and more compact textures)
 
 
-class DummySegment:
-    """
-    Because of the nature of the sprites, the parent_segment isn't needed, but this will lead to a misalignment of the
-    index's. To combat this we use a dummy segment.
-    """
-
-    def __init__(self, seg_id):
-        self.id: str = seg_id
-        self.depth: float = float('inf')
-
-
 class SpriteSegment:
 
-    def __init__(self, seg_id, sprite, position, depth):
+    def __init__(self, seg_id, sprite, target_joint, position, depth):
         self.id: str = seg_id
+        self.target_joint: int = target_joint
         self.sprite: arcade.Sprite = sprite
-        self.model_pos: Tuple[float, float, float] = position
+        self.model_pos: la.Vec2 = position
         self.depth: float = depth
 
 
@@ -120,13 +109,12 @@ class SpriteModel:
             self._sprite_list.extend(sprite_list)
 
     def on_update(self):
-        for segment in self.segment_list[1:]:
-            segment.sprite.center_x = self.model_pixel_scale.x * segment.model_pos[0] * 5 + 200
-            segment.sprite.center_y = self.model_pixel_scale.y * segment.model_pos[1] * 5 + 200
-            segment.sprite.radians = segment.model_pos[2]
+        for segment in self.segment_list:
+            segment.sprite.center_x = self.model_pixel_scale.x * segment.model_pos.x + 200
+            segment.sprite.center_y = self.model_pixel_scale.y * segment.model_pos.y + 200
+            segment.sprite.radians = 0
 
     def draw(self):
-        self._sprite_list.draw_hit_boxes((0, 0, 0, 0))
         self._sprite_list.draw(pixelated=True)
 
 
@@ -144,14 +132,14 @@ def make_sprite_segment(sprite_data, sprite_scale, texture_location, seg_list):
     """
     details = sprite_data['piece_data']
     position = sprite_data['position']
-    radians = math.radians(sprite_data['rotation'])
     texture = arcade.load_texture(texture_location, details[0], details[1], details[2], details[3])
 
     sprite = arcade.Sprite()
     sprite.texture = texture
-    sprite.scale = sprite_scale * 5
+    sprite.scale = sprite_scale
 
-    segment = SpriteSegment(sprite_data['id'], sprite, [position[0], position[1], radians], position[2])
+    segment = SpriteSegment(sprite_data['id'], sprite, sprite_data['target_joint'],
+                            la.Vec2(position[0], position[1]), position[2])
     seg_list.append(segment)
     for child in sprite_data['children']:
         make_sprite_segment(child, sprite_scale, texture_location, seg_list)
@@ -160,15 +148,14 @@ def make_sprite_segment(sprite_data, sprite_scale, texture_location, seg_list):
 def create_sprite_model(file, cache_imperative=2):
     """
     Generates a model made of a list of sprites derived from a json file.
-
     :param file: a json file detailing the model.
     :param cache_imperative: the cache imperative. This decides whether the model should be cached.
      0 = don't cache, 1 = cache and return, 2 = cache copy and return.
     :return: a generated model.
     """
     json_data = json.load(open(file))
-    segments = [DummySegment(json_data['id'])]
-    sprite_scale = 1/json_data['sprite_scale']
+    segments = []
+    sprite_scale = 3/json_data['sprite_scale']
     text_location = json_data['sprite_location']
 
     for child in json_data['children']:

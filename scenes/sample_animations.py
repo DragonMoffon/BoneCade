@@ -1,6 +1,6 @@
 import arcade
 
-from skinned_renderer import create_sample_prim_renderer
+from skinned_renderer import create_sample_prim_renderer, create_sample_sprite_renderer
 from model import create_sprite_model
 from clock import GAME_CLOCK
 from global_access import SCREEN_WIDTH, SCREEN_HEIGHT
@@ -22,20 +22,19 @@ class SampleScene(arcade.Window):
         self.selected_joint = -1
         self.test_prim_entity = create_sample_prim_renderer()
 
-        self.test_sprite_model = create_sprite_model("resources/models/sprites/robot.json")
+        self.test_sprite_renderer = create_sample_sprite_renderer()
 
     def on_update(self, delta_time: float):
         GAME_CLOCK.increment(delta_time)
 
-        self.test_sprite_model.on_update()
-
     def on_draw(self):
         arcade.start_render()
 
-        arcade.draw_text("Prim Renderer", 100, SCREEN_HEIGHT-112, anchor_x='center')
+        arcade.draw_text("Prim Renderer", 100, SCREEN_HEIGHT - 112, anchor_x='center')
         self.test_prim_entity.draw()
 
-        self.test_sprite_model.draw()
+        self.test_sprite_renderer.find_render_data()
+        self.test_sprite_renderer.draw()
 
         if not GAME_CLOCK.is_counting:
             arcade.draw_text(f"PAUSED - time elapsed since last pause: {GAME_CLOCK.concurrent_run_time}s",

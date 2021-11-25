@@ -1,5 +1,6 @@
 import arcade
 from clock import GAME_CLOCK
+from scenes.animator import AnimatorWindow
 from scenes.sample_animations import SampleScene
 
 

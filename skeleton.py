@@ -18,6 +18,7 @@ import json
 import arcade
 
 import lin_al as la
+from lin_al import RotTrans
 from memory import cache
 
 
@@ -25,6 +26,7 @@ class Joint:
 
     def __init__(self, inv_matrix, joint_name, parent):
         self.inv_bind_pose_matrix: la.Matrix33 = inv_matrix
+        self.joint_model_pos: la.Vec2 = la.Vec2(0) * la.Matrix33.lazy_inverse(inv_matrix)
         self.joint_name: str = joint_name
         self.parent: int = parent
 
@@ -35,6 +37,19 @@ class Skeleton:
         self.skeleton_id: str = name
         self.joint_count: int = len(joint_list)
         self.joints: List[Joint] = joint_list
+
+
+def draw_skeleton(skeleton: Skeleton, world_matrix: la.Matrix33):
+    joint_parents = []
+    for joint in skeleton.joints:
+        position = joint.joint_model_pos * world_matrix
+
+        if joint.parent != -1:
+            parent_position = joint_parents[joint.parent]
+            arcade.draw_line(position.x, position.y, parent_position.x, parent_position.y, arcade.color.RADICAL_RED, 2)
+        arcade.draw_point(position.x, position.y, arcade.color.ORANGE, 5)
+
+        joint_parents.append(position)
 
 
 skeleton_cache: Dict[str, Skeleton] = {}
@@ -77,21 +92,11 @@ def create_skeleton(file, target, cache_imperative=1):
     return skeleton
 
 
-class JointPose:
-
-    def __init__(self, angle, trans_x, trans_y):
-        self.angle: float = angle
-        self.translation: la.Vec2 = la.Vec2(trans_x, trans_y)
-
-    def to_matrix(self):
-        return la.Matrix33.all_matrix(self.translation, la.Vec2(1), self.angle)
-
-
 class SkeletonPose:
 
     def __init__(self, skeleton, joint_poses, model_poses=None):
         self.skeleton: Skeleton = skeleton
-        self.joint_poses: List[JointPose] = joint_poses  # relative to parent joint
+        self.joint_poses: List[RotTrans] = joint_poses  # relative to parent joint
         self.model_poses: List[la.Matrix33] = model_poses  # relative to model space
         if model_poses is None:
             self.calculate_model_poses()
@@ -112,7 +117,7 @@ class SkeletonPose:
 
     def temp_draw(self, temp_matrix):
         """
-        Draws the Pose for debugging.
+        Draws the Skeleton Pose for debugging.
         :param temp_matrix: a model -> world view matrix
         """
         world_pos_joints = []
@@ -129,13 +134,15 @@ class SkeletonPose:
 
             if skeleton_joint.parent >= 0:
                 parent = world_pos_joints[skeleton_joint.parent]
-                arcade.draw_line(current_point.x, current_point.y, parent.x, parent.y, arcade.color.ORANGE)
+                arcade.draw_line(current_point.x, current_point.y, parent.x, parent.y, arcade.color.ORANGE, 2)
 
-            arcade.draw_circle_outline(current_point.x, current_point.y, 4, arcade.color.BLUE)
+            arcade.draw_circle_filled(current_point.x, current_point.y, 4, arcade.color.LILAC)
             arcade.draw_line(current_point.x, current_point.y, x_axis.x, x_axis.y, arcade.color.RED)
             arcade.draw_line(current_point.x, current_point.y, y_axis.x, y_axis.y, arcade.color.GREEN)
 
             index += 1
+
+        return world_pos_joints
 
 
 pose_cache: Dict[str, SkeletonPose] = {}
@@ -165,7 +172,7 @@ def get_pose(file, target_pose, cache_imperative: int = 1):
 
     for index, joint in enumerate(skeleton.joints):
         pose = pose_data[index]
-        current_pose = JointPose(*pose)
+        current_pose = RotTrans(*pose)
 
         if joint.parent != -1:
             former_matrix = model_poses[joint.parent]
