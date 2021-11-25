@@ -105,7 +105,7 @@
       "children": [
         {
           "id": "right_calf",
-          "piece_data": [165, 35, 75, 30],
+          "piece_data": [165, 0, 75, 30],
           "position": [-0.015625, 0.171875, 0.11],
           "target_joint": 14,
           "children": [

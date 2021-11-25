@@ -99,8 +99,9 @@ class SpriteSkinnedRenderer:
 
             if not poses:
                 final_joint = joint.joint_model_pos * world_matrix
-                joint_matrices.append(((world_matrix, 1),))
+                joint_matrices.append((world_matrix,))
                 joint_positions.append(final_joint)
+                joint_angles.append(0)
             else:
                 matrices = []
                 final_point = la.Vec2(0)
@@ -116,9 +117,8 @@ class SpriteSkinnedRenderer:
 
                 if joint.parent != -1:
                     parent_point = joint_positions[joint.parent]
-                    angle = atan2(final_point.y - parent_point.y, final_point.x - parent_point.y)
-                    if angle < 0:
-                        angle += 2 * pi
+                    angle = (final_point - parent_point).theta
+                    print(index, degrees(angle))
                     joint_angles.append(angle)
                 else:
                     joint_angles.append(0)
