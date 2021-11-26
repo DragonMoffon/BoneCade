@@ -146,6 +146,7 @@ class AnimationSet:
     def add_animation(self, clip, weight, start_time, loop_num, playback):
         new_anim = Animation(clip, weight, start_time, loop_num, playback)
         self.animations.append(new_anim)
+        return new_anim
 
     def get_poses(self):
         poses, weights = [], []

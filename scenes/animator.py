@@ -84,6 +84,8 @@ class AnimatorWindow(arcade.Window):
         self.current_frame = 0
         self.pending_frame = 0
 
+        self.animation: animation.Animation = None
+
         self.current_pose: animation.FramePose = current_pose
         self.model_world_matrices = calculate_model_poses(self.current_skeleton.joints, current_pose.joint_poses)
 
@@ -94,7 +96,6 @@ class AnimatorWindow(arcade.Window):
         self.frame_renderer = skinned_renderer.Primitive(self.current_skeleton,
                                                          prim_model_from_skeleton(self.current_skeleton),
                                                          self.world_transform)
-        self.frame_renderer.animator.add_animation(self.current_clip, 1, GAME_CLOCK.run_time, -1, 0.5)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.PERIOD:
@@ -107,6 +108,14 @@ class AnimatorWindow(arcade.Window):
             self.current_pose = self.current_clip.frames[self.current_frame]
             self.model_world_matrices = calculate_model_poses(self.current_skeleton.joints,
                                                               self.current_pose.joint_poses)
+        elif symbol == arcade.key.SPACE:
+            if self.animation is not None:
+                self.animation.smooth_stop()
+                self.animation = None
+            else:
+                self.animation = self.frame_renderer.animator.add_animation(self.current_clip, 1,
+                                                                            GAME_CLOCK.run_time, -1, 0.375)
+
         elif symbol == arcade.key.P:
             self.current_frame = self.pending_frame
             self.current_pose = self.current_clip.frames[self.pending_frame]
@@ -145,7 +154,10 @@ class AnimatorWindow(arcade.Window):
 
         arcade.draw_line(0, SCREEN_HEIGHT/2-1, SCREEN_WIDTH, SCREEN_HEIGHT/2-1, arcade.color.WHITE, 2)
 
-        self.frame_renderer.pose_draw(self.current_pose)
+        if not self.frame_renderer.animator.animations:
+            self.frame_renderer.pose_draw(self.current_pose)
+        else:
+            self.frame_renderer.draw()
 
         arcade.draw_text(f"Frame: {self.current_frame+1}/{self.current_clip.frame_count}", 15, SCREEN_HEIGHT-15)
 
