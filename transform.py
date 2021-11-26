@@ -17,3 +17,6 @@ class Transform:
 
     def to_matrix(self):
         return la.Matrix33.all_matrix(self.position, self.scale, self.rotation)
+
+    def to_inverse(self):
+        return la.Matrix33.inverse_all_matrix(self.position, self.scale, self.rotation)

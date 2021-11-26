@@ -55,8 +55,17 @@ class Vec2:
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __rdiv__(self, other):
-        return Vec2(other/self.x, other/self.y)
+    def __truediv__(self, other):
+        if isinstance(other, Vec2):
+            return Vec2(self.x/other.x, self.y/other.y)
+        else:
+            return Vec2(self.x/other, self.y/other)
+
+    def __rtruediv__(self, other):
+        if isinstance(other, Vec2):
+            return Vec2(other.x / self.x, other.y / self.y)
+        else:
+            return Vec2(other/self.x, other/self.y)
 
     def __add__(self, other):
         if isinstance(other, Vec2):

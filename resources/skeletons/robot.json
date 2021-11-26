@@ -24,13 +24,23 @@
           ],
           "children": [
             {
-              "id": "head",
+              "id": "neck",
               "matrix": [
                 1, 0, 0,
                 0, 1, 0,
-                0, -0.75, 1
+                0, -0.6875, 1
               ],
-              "children": []
+              "children": [
+                {
+                  "id": "head",
+                  "matrix": [
+                    1, 0, 0,
+                    0, 1, 0,
+                    0, -0.75, 1
+                  ],
+                  "children": []
+                }
+              ]
             },
             {
               "id": "left_elbow",

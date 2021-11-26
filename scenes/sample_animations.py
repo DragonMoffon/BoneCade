@@ -16,7 +16,7 @@ class SampleScene(arcade.Window):
 
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
-        # arcade.set_background_color(arcade.color.WHITE)
+        arcade.set_background_color(arcade.color.WHITE)
         GAME_CLOCK.begin()
 
         self.selected_joint = -1
@@ -30,18 +30,21 @@ class SampleScene(arcade.Window):
     def on_draw(self):
         arcade.start_render()
 
-        arcade.draw_text("Prim Renderer", 100, SCREEN_HEIGHT - 112, anchor_x='center')
+        arcade.draw_text("Prim Renderer", SCREEN_WIDTH/6, SCREEN_HEIGHT/2,
+                         anchor_x='center', anchor_y='top', color=arcade.color.BLACK)
         self.test_prim_entity.draw()
 
+        arcade.draw_text("Sprite Renderer", SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
+                         anchor_x='center', anchor_y='top', color=arcade.color.BLACK)
         self.test_sprite_renderer.find_render_data()
         self.test_sprite_renderer.draw()
 
         if not GAME_CLOCK.is_counting:
             arcade.draw_text(f"PAUSED - time elapsed since last pause: {GAME_CLOCK.concurrent_run_time}s",
-                             SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, anchor_x='center')
+                             SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, anchor_x='center', color=arcade.color.BLACK)
         else:
             arcade.draw_text(f"time elapsed: {GAME_CLOCK.run_time}s, run speed: {GAME_CLOCK.run_speed}",
-                             SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 200, anchor_x='center')
+                             SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 200, anchor_x='center', color=arcade.color.BLACK)
 
     # -- BUTTON EVENTS --
 

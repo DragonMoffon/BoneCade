@@ -1,5 +1,5 @@
-from typing import List, Tuple
-from math import atan2, pi, degrees
+from typing import Tuple, List
+from math import degrees
 
 import arcade
 
@@ -13,20 +13,27 @@ import transform
 import animation
 
 
-class PrimitiveSkinnedRenderer:
+class SkinnedRenderer:
+
+    def __init__(self, render_skeleton, render_model, position):
+        self.skeleton: skeleton.Skeleton = render_skeleton
+        self.transform: transform.Transform = position
+        self.model = render_model
+        self.animator: animation.AnimationSet = animation.AnimationSet()
+
+
+class Primitive(SkinnedRenderer):
     """
     A skeleton and a primitive model.
     """
 
     def __init__(self, render_skeleton, render_model, position):
-        self.skeleton: skeleton.Skeleton = render_skeleton
-        self.transform: transform.Transform = position
-        self.model: model.PrimitiveModel = render_model
-        self.animation_set: animation.AnimationSet = animation.AnimationSet()
-        self.last_world_space_joints = []
+        super().__init__(render_skeleton, render_model, position)
+        self.last_world_space_joints: List[la.Vec2] = []
 
-    def calculate_prim_point(self, index, segment, poses, weights, world_matrix):
+    def calculate_prim_point(self, index, poses, weights, world_matrix):
         inverse_matrix = self.skeleton.joints[index].inv_bind_pose_matrix
+        segment = self.model.segment_list[index]
 
         if not len(poses):
             final_point = segment.model_view_pos * world_matrix
@@ -38,37 +45,52 @@ class PrimitiveSkinnedRenderer:
                 final_point += segment.model_view_pos * skinning_matrix * world_matrix * weights[k]
         return final_point
 
-    def draw(self):
+    def render_points(self, poses, weights):
         index = 0
-        poses, weights = self.animation_set.get_poses()
         world_matrix = self.transform.to_matrix()
 
         world_space_joints = []
         while index < self.skeleton.joint_count:
             primitive_segment = self.model.segment_list[index]
 
-            final_point = self.calculate_prim_point(index, primitive_segment, poses, weights, world_matrix)
+            final_point = self.calculate_prim_point(index, poses, weights, world_matrix)
             if primitive_segment.parent_primitive_index != -1:
                 parent_point = world_space_joints[primitive_segment.parent_primitive_index]
                 arcade.draw_line(final_point.x, final_point.y, parent_point.x, parent_point.y,
                                  primitive_segment.colour, primitive_segment.thickness)
-            arcade.draw_point(final_point.x, final_point.y, primitive_segment.colour, primitive_segment.thickness*2)
+            arcade.draw_point(final_point.x, final_point.y, primitive_segment.colour, primitive_segment.thickness * 2)
 
             world_space_joints.append(final_point)
             index += 1
 
         self.last_world_space_joints = world_space_joints
 
+    def draw(self):
+        poses, weights = self.animator.get_poses()
+        self.render_points(poses, weights)
+
+    def pose_draw(self, pose: animation.FramePose):
+        poses = []
+        for index, joint_pose in enumerate(pose.joint_poses):
+            parent = self.skeleton.joints[index].parent
+            if parent != -1:
+                poses.append(joint_pose.to_matrix() * poses[parent])
+            else:
+                poses.append(joint_pose.to_matrix())
+
+        self.render_points((poses,), (1,))
+
 
 def create_sample_prim_renderer():
-    animation.generate_clips("resources/poses/animations/basic_motion.json", 'run')
+    clip = animation.generate_clips("resources/poses/animations/basic_motion.json", 'run')
 
-    entity_skeleton = skeleton.create_skeleton("resources/skeletons/basic.json", "basic")
+    entity_skeleton = skeleton.create_skeleton("basic")
     entity_model = model.create_primitive_model("resources/models/primitives/basic.json")
 
-    position = transform.Transform(la.Vec2(100, SCREEN_HEIGHT-100), la.Vec2(50), 0)
-    sample_prim = PrimitiveSkinnedRenderer(entity_skeleton, entity_model, position)
-    sample_prim.animation_set.add_animation('run', 1, GAME_CLOCK.run_time, -1, 1/2)
+    position = transform.Transform(la.Vec2(SCREEN_WIDTH/6, SCREEN_HEIGHT/2), la.Vec2(128), 0)
+    sample_prim = Primitive(entity_skeleton, entity_model, position)
+
+    sample_prim.animator.add_animation(clip, 1, GAME_CLOCK.run_time, -1, 0.375)
     return sample_prim
 
 
@@ -79,13 +101,10 @@ class SpriteRenderData:
         self.angles: Tuple[float] = angles
 
 
-class SpriteSkinnedRenderer:
+class Sprites(SkinnedRenderer):
 
     def __init__(self, render_skeleton, render_model, render_transform):
-        self.skeleton: skeleton.Skeleton = render_skeleton
-        self.model: model.SpriteModel = render_model
-        self.transform: transform.Transform = render_transform
-        self.animator: animation.AnimationSet = animation.AnimationSet()
+        super().__init__(render_skeleton, render_model, render_transform)
         self.render_data: SpriteRenderData = None
 
     def find_render_data(self):
@@ -113,12 +132,9 @@ class SpriteSkinnedRenderer:
                 joint_matrices.append(tuple(matrices))
                 joint_positions.append(final_point)
 
-                arcade.draw_point(final_point.x, final_point.y, arcade.color.RADICAL_RED, 5)
-
                 if joint.parent != -1:
                     parent_point = joint_positions[joint.parent]
                     angle = (final_point - parent_point).theta
-                    print(index, degrees(angle))
                     joint_angles.append(angle)
                 else:
                     joint_angles.append(0)
@@ -126,10 +142,14 @@ class SpriteSkinnedRenderer:
         self.render_data = SpriteRenderData(tuple(joint_matrices), tuple(joint_angles))
 
     def draw(self):
+        scale = self.transform.scale.x/self.model.model_pixel_scale.x * self.model.model_pixel_scale.y
         if self.render_data is not None:
             for segment in self.model.segment_list:
                 index = segment.target_joint
                 sprite = segment.sprite
+
+                if sprite.scale != scale:
+                    sprite.scale = scale
 
                 sprite.angle = degrees(self.render_data.angles[index])
                 position = la.Vec2(0)
@@ -142,12 +162,12 @@ class SpriteSkinnedRenderer:
 
 
 def create_sample_sprite_renderer():
-    animation.generate_clips("resources/poses/animations/robot_motion.json", 'run')
+    clip = animation.generate_clips("resources/poses/animations/robot_motion.json", 'run')
 
-    render_skeleton = skeleton.create_skeleton("resources/skeletons/robot.json", "robot")
+    render_skeleton = skeleton.create_skeleton("robot")
     render_model = model.create_sprite_model("resources/models/sprites/robot.json")
 
-    position = transform.Transform(la.Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2), la.Vec2(64*3), 0)
-    sample_sprite = SpriteSkinnedRenderer(render_skeleton, render_model, position)
-    sample_sprite.animator.add_animation('run', 1, GAME_CLOCK.run_time, -1, 1/2)
+    position = transform.Transform(la.Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2), la.Vec2(128), 0)
+    sample_sprite = Sprites(render_skeleton, render_model, position)
+    sample_sprite.animator.add_animation(clip, 1, GAME_CLOCK.run_time, -1, 0.375)
     return sample_sprite

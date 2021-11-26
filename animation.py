@@ -55,41 +55,19 @@ def generate_clip(clip_data: dict, target_skeleton):
     for frame in clip_data['frames']:
         frames.append(generate_frame(frame))
 
-    clip_cache[clip_data['id']] = Clip(target_skeleton, frames, clip_data['fps'], clip_data['loop'])
+    clip = Clip(target_skeleton, frames, clip_data['fps'], clip_data['loop'])
+    clip_cache[clip_data['id']] = clip
+    return clip
 
 
 def generate_clips(file, target):
     json_data = json.load(open(file))
-    target_skeleton = skeleton.create_skeleton(f"resources/skeletons/{json_data['target']}.json", json_data['target'])
+    target_skeleton = skeleton.create_skeleton(json_data['target'])
     for clip in json_data['clips']:
         generate_clip(clip, target_skeleton)
 
     if target is not None:
         return clip_cache[target]
-
-
-def convert_clip(poses: List[skeleton.SkeletonPose], clip_id: str, loop: bool, fps: float):
-    target_skeleton = poses[0].skeleton
-    frame_poses = []
-    for pose in poses:
-        frame_pose = FramePose(pose.joint_poses)
-        frame_poses.append(frame_pose)
-
-    clip_cache[clip_id] = Clip(target_skeleton, frame_poses, fps, loop)
-
-
-def save_clips(file: str, target: str, clips: List[str]):
-    save_data = {'target': target, 'clips': []}
-    for clip_target in clips:
-        clip = clip_cache[clip_target]
-        clip_data = {'id': clip_target, 'loop': clip.is_looping, 'fps': clip.frames_per_second, 'frames': []}
-        for frame in clip.frames:
-            frame_data = []
-            for joint_pose in frame.joint_poses:
-                frame_data.append([joint_pose.angle, joint_pose.translation.x, joint_pose.translation.y])
-            clip_data['frames'].append(frame_data)
-        save_data['clips'].append(clip_data)
-    json.dump(save_data, open(file, 'w'), indent=4)
 
 
 class Animation:
@@ -165,13 +143,9 @@ class AnimationSet:
     def __init__(self):
         self.animations: List[Animation] = []
 
-    def add_animation(self, clip_id, weight, start_time, loop_num, playback):
-        clip = clip_cache.get(clip_id, None)
-        if clip is None:
-            print(f"Clip Id {clip_id} is not cached, make sure the animation you are asking for has been loaded")
-        else:
-            new_anim = Animation(clip, weight, start_time, loop_num, playback)
-            self.animations.append(new_anim)
+    def add_animation(self, clip, weight, start_time, loop_num, playback):
+        new_anim = Animation(clip, weight, start_time, loop_num, playback)
+        self.animations.append(new_anim)
 
     def get_poses(self):
         poses, weights = [], []

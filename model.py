@@ -30,11 +30,11 @@ class PrimitiveModel:
     A model created out of primitive lines.
     """
 
-    def __init__(self, joints: List[SegmentPrimitive], name):
+    def __init__(self, segments: List[SegmentPrimitive], name):
         self.model_name = name
 
-        self.segment_list: List[SegmentPrimitive] = joints
-        self.master_joint: SegmentPrimitive = joints[0]
+        self.segment_list: List[SegmentPrimitive] = segments
+        self.master_joint: SegmentPrimitive = segments[0]
 
 
 prim_cache: Dict[str, PrimitiveModel] = {}
@@ -43,7 +43,7 @@ prim_cache: Dict[str, PrimitiveModel] = {}
 def make_prim_segment(joint_list: List[SegmentPrimitive], parent_index: int, joint_data: dict):
     """
     Recursive generation of Joint Primitive.
-    :param joint_list: Model's primitive joints
+    :param joint_list: Model's primitive segments
     :param parent_index: Index of parent
     :param joint_data: The joint data dict
     :return: a Joint Primitive
@@ -108,12 +108,6 @@ class SpriteModel:
             self._sprite_list = arcade.SpriteList()
             self._sprite_list.extend(sprite_list)
 
-    def on_update(self):
-        for segment in self.segment_list:
-            segment.sprite.center_x = self.model_pixel_scale.x * segment.model_pos.x + 200
-            segment.sprite.center_y = self.model_pixel_scale.y * segment.model_pos.y + 200
-            segment.sprite.radians = 0
-
     def draw(self):
         self._sprite_list.draw(pixelated=True)
 
@@ -155,7 +149,7 @@ def create_sprite_model(file, cache_imperative=2):
     """
     json_data = json.load(open(file))
     segments = []
-    sprite_scale = 3/json_data['sprite_scale']
+    sprite_scale = 1/json_data['sprite_scale']
     text_location = json_data['sprite_location']
 
     for child in json_data['children']:
