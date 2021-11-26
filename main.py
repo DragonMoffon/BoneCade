@@ -5,8 +5,8 @@ from scenes.sample_animations import SampleScene
 
 
 def main():
-    animator = animator_setup()  # Uncomment to play around with the animator!
-    # sample = SampleScene()  # Uncomment to see some sample animations!
+    # animator = animator_setup()  # Uncomment to play around with the animator!
+    sample = SampleScene()  # Uncomment to see some sample animations!
     GAME_CLOCK.begin()
     arcade.run()
 
