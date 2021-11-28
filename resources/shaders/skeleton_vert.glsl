@@ -23,7 +23,7 @@ void main(){
     vec2 final_pos = vec2(0); // (joints.skinned_matrix[int(joint_indices[0])] * pos).xy;
     for (int i=0; i < 4; i++)
     {
-        float weight = i < 3? joint_weights[i] : 1.0 - joint_weights[1] - joint_weights[2] - joint_weights[2];
+        float weight = i < 3? joint_weights[i] : 1.0 - joint_weights[0] - joint_weights[1] - joint_weights[2];
         if (weight == 0) break;
         final_pos += (joints.skinned_matrix[int(joint_indices[i])] * pos).xy * weight;
     }
