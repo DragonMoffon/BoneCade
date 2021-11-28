@@ -1,6 +1,7 @@
 from typing import Tuple, List
 from math import degrees
-from numpy import zeros, arange
+from numpy import zeros, arange, float32
+from struct import unpack
 
 import arcade
 import arcade.gl as gl
@@ -184,18 +185,33 @@ class Mesh(SkinnedRenderer):
         super().__init__(render_skeleton, render_model, position)
         self.ctx = context
         render_model.calculate_buffers(context)
+
+        # self.test_prog = context.load_program(vertex_shader="resources/shaders/transform_test_vert.glsl")
+        # self.test_geo = context.geometry(
+        #     [gl.BufferDescription(render_model.vertex_buffer, '4f 3f 3f 2f', ['joint_indices', 'joint_weights',
+        #                                                                       'vert_pos', 'vert_uv'])],
+        #     index_buffer=render_model.index_buffer, index_element_size=2)
+
+        # self.buffer_format = ""
+        # for _ in range(len(render_model.vertices)):
+        #     self.buffer_format += "f f f f f f f f f f f f f f f f "
+        # self.test_prog["Projection"].binding = 0
+        # self.test_prog["JointMatrix"].binding = 1
+
         self.geometry = context.geometry(
-            [gl.BufferDescription(render_model.vertex_buffer, '4i 3f 3f 2f', ['joint_indices', 'joint_weights',
+            [gl.BufferDescription(render_model.vertex_buffer, '4f 3f 3f 2f', ['joint_indices', 'joint_weights',
                                                                               'vert_pos', 'vert_uv'])],
             index_buffer=render_model.index_buffer, index_element_size=2, mode=context.TRIANGLES
         )
         self.program = context.load_program(vertex_shader="resources/shaders/skeleton_vert.glsl",
                                             fragment_shader="resources/shaders/skeleton_frag.glsl")
-        self.program["Projection"] = 0
-        self.program["JointMatrix"] = 1
+
+        self.program["Projection"].binding = 0
+        self.program["JointMatrix"].binding = 1
         self.update_world_matrix()
 
-        self.skeleton_buffer = context.buffer(data=zeros(512, float), usage='dynamic')
+        self.skeleton_buffer = context.buffer(data=zeros(512, float32), usage='dynamic')
+        self.target_buffer = context.buffer(reserve=len(render_model.vertices)*4*16, usage='dynamic')
 
     def update_world_matrix(self):
         m33 = self.transform.to_matrix().values
@@ -204,11 +220,16 @@ class Mesh(SkinnedRenderer):
                                  m33[6], m33[7], m33[8], 0,
                                  0, 0, 0, 1]
 
+        # self.test_prog['world'] = [m33[0], m33[1], m33[2], 0,
+        #                            m33[3], m33[4], m33[5], 0,
+        #                            m33[6], m33[7], m33[8], 0,
+        #                            0, 0, 0, 1]
+
     def draw(self):
-        matrices = zeros(512, float)
+        matrices = zeros(512, float32)
         poses, weights = self.animator.get_poses()
         for index, joint_pose in enumerate(poses[0]):
-            sm = joint_pose * self.skeleton.joints[index].inv_bind_pose_matrix
+            sm = self.skeleton.joints[index].inv_bind_pose_matrix * joint_pose
             index_range = arange(16*index, 16*index + 16)
             matrices.put(index_range, [sm[0], sm[1], sm[2], 0,
                                        sm[3], sm[4], sm[5], 0,
@@ -217,6 +238,9 @@ class Mesh(SkinnedRenderer):
 
         self.skeleton_buffer.write(matrices)
         self.skeleton_buffer.bind_to_uniform_block(1)
+
+        # self.test_geo.transform(self.test_prog, self.target_buffer)
+        # print(unpack(self.buffer_format, self.target_buffer.read())[16:32])
 
         self.ctx.enable(self.ctx.DEPTH_TEST)
         self.geometry.render(self.program, vertices=len(self.model.indices))
@@ -228,7 +252,7 @@ def create_sample_mesh_renderer(context):
     render_skeleton = skeleton.create_skeleton("robot")
     render_model = model.load_mesh_model('robot')
 
-    position = transform.Transform(la.Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2), la.Vec2(128), 0)
+    position = transform.Transform(la.Vec2(5*SCREEN_WIDTH/6, SCREEN_HEIGHT/2), la.Vec2(128), 0)
     sample_mesh = Mesh(render_skeleton, render_model, position, context)
     sample_mesh.animator.add_animation(clip, 1, GAME_CLOCK.run_time, -1, 0.375)
     return sample_mesh

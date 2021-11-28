@@ -181,11 +181,9 @@ class Vertex:
     def get_data(self):
         # Return indices as vec4
         for index in self.joint_indices:
-            print(index)
             yield index
         # yield weights as vec3
         for weight in self.joint_weights:
-            print(weight)
             yield weight
         # yield pos and depth as vec3
         yield self.pos.x

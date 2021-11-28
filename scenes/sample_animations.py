@@ -43,6 +43,8 @@ class SampleScene(arcade.Window):
         self.test_sprite_renderer.find_render_data()
         self.test_sprite_renderer.draw()
 
+        arcade.draw_text("Mesh Renderer", 5*SCREEN_WIDTH / 6, SCREEN_HEIGHT / 2,
+                         anchor_x='center', anchor_y='top', color=arcade.color.BLACK)
         self.test_mesh_renderer.draw()
 
         if not GAME_CLOCK.is_counting:
