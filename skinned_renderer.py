@@ -1,7 +1,9 @@
 from typing import Tuple, List
 from math import degrees
+from numpy import zeros, arange
 
 import arcade
+import arcade.gl as gl
 
 
 import lin_al as la
@@ -20,6 +22,9 @@ class SkinnedRenderer:
         self.transform: transform.Transform = position
         self.model = render_model
         self.animator: animation.AnimationSet = animation.AnimationSet()
+
+    def draw(self):
+        pass
 
 
 class Primitive(SkinnedRenderer):
@@ -171,3 +176,59 @@ def create_sample_sprite_renderer():
     sample_sprite = Sprites(render_skeleton, render_model, position)
     sample_sprite.animator.add_animation(clip, 1, GAME_CLOCK.run_time, -1, 0.375)
     return sample_sprite
+
+
+class Mesh(SkinnedRenderer):
+
+    def __init__(self, render_skeleton, render_model: model.MeshModel, position, context: arcade.ArcadeContext):
+        super().__init__(render_skeleton, render_model, position)
+        self.ctx = context
+        render_model.calculate_buffers(context)
+        self.geometry = context.geometry(
+            [gl.BufferDescription(render_model.vertex_buffer, '4i 3f 3f 2f', ['joint_indices', 'joint_weights',
+                                                                              'vert_pos', 'vert_uv'])],
+            index_buffer=render_model.index_buffer, index_element_size=2, mode=context.TRIANGLES
+        )
+        self.program = context.load_program(vertex_shader="resources/shaders/skeleton_vert.glsl",
+                                            fragment_shader="resources/shaders/skeleton_frag.glsl")
+        self.program["Projection"] = 0
+        self.program["JointMatrix"] = 1
+        self.update_world_matrix()
+
+        self.skeleton_buffer = context.buffer(data=zeros(512, float), usage='dynamic')
+
+    def update_world_matrix(self):
+        m33 = self.transform.to_matrix().values
+        self.program['world'] = [m33[0], m33[1], m33[2], 0,
+                                 m33[3], m33[4], m33[5], 0,
+                                 m33[6], m33[7], m33[8], 0,
+                                 0, 0, 0, 1]
+
+    def draw(self):
+        matrices = zeros(512, float)
+        poses, weights = self.animator.get_poses()
+        for index, joint_pose in enumerate(poses[0]):
+            sm = joint_pose * self.skeleton.joints[index].inv_bind_pose_matrix
+            index_range = arange(16*index, 16*index + 16)
+            matrices.put(index_range, [sm[0], sm[1], sm[2], 0,
+                                       sm[3], sm[4], sm[5], 0,
+                                       sm[6], sm[7], sm[8], 0,
+                                       0,     0,     0,     1])
+
+        self.skeleton_buffer.write(matrices)
+        self.skeleton_buffer.bind_to_uniform_block(1)
+
+        self.ctx.enable(self.ctx.DEPTH_TEST)
+        self.geometry.render(self.program, vertices=len(self.model.indices))
+
+
+def create_sample_mesh_renderer(context):
+    clip = animation.generate_clips("resources/poses/animations/robot_motion.json", 'run')
+
+    render_skeleton = skeleton.create_skeleton("robot")
+    render_model = model.load_mesh_model('robot')
+
+    position = transform.Transform(la.Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2), la.Vec2(128), 0)
+    sample_mesh = Mesh(render_skeleton, render_model, position, context)
+    sample_mesh.animator.add_animation(clip, 1, GAME_CLOCK.run_time, -1, 0.375)
+    return sample_mesh

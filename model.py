@@ -1,7 +1,9 @@
 import json
-from typing import List, Dict
+from typing import List, Dict, Tuple
+from array import array
 
 import arcade
+import arcade.gl as gl
 
 import lin_al as la
 from memory import cache
@@ -165,3 +167,105 @@ def create_sprite_model(file, cache_imperative=2):
 # This implementation uses a vertex buffer to store the values, and uses a vertex shader to position the vertices.
 # By doing it this way the 2D characters will not suffer from any splitting when being animated like there is for the
 # other two implementations.
+
+class Vertex:
+
+    def __init__(self, pos: la.Vec2, depth: float, uv: la.Vec2,
+                 indices: Tuple[int, int, int, int], weights: Tuple[float, float, float]):
+        self.pos: la.Vec2 = pos
+        self.depth: float = depth
+        self.uv: la.Vec2 = uv
+        self.joint_indices: Tuple[int, int, int, int] = indices
+        self.joint_weights: Tuple[float, float, float] = weights
+
+    def get_data(self):
+        # Return indices as vec4
+        for index in self.joint_indices:
+            print(index)
+            yield index
+        # yield weights as vec3
+        for weight in self.joint_weights:
+            print(weight)
+            yield weight
+        # yield pos and depth as vec3
+        yield self.pos.x
+        yield self.pos.y
+        yield self.depth
+        # yield uv values as vec2
+        yield self.uv.x
+        yield self.uv.y
+
+
+class MeshModel:
+
+    def __init__(self, model_name, vertices, indices):
+        self.model_name: str = model_name
+
+        self.vertices: Tuple[Vertex, ...] = vertices
+        self.indices: Tuple[int, ...] = indices
+        self.vertex_buffer: gl.Buffer = None
+        self.index_buffer: gl.Buffer = None
+
+    def calculate_buffers(self, context: arcade.context.Context):
+        self.vertex_buffer = context.buffer(data=array('f', self.get_vertices_data()))
+        self.index_buffer = context.buffer(data=array('H', self.get_indices()))
+
+    def get_vertices_data(self):
+        for vertex in self.vertices:
+            yield from vertex.get_data()
+
+    def get_indices(self):
+        for index in self.indices:
+            yield index
+
+
+def load_mesh_model(model_name):
+    vertex_positions = []
+    vertex_uvs = []
+    vertex_weights = []
+    vertices_data: List[Tuple[int, int]] = []
+    triangles = []
+
+    def get_position(data: List[str]):
+        position = la.Vec2(float(data[0]), -float(data[2]))
+        depth = float(data[1])
+        vertex_positions.append((position, depth))
+
+    def get_uvs(data: List[str]):
+        uv = la.Vec2(float(data[0]), float(data[1]))
+        vertex_uvs.append(uv)
+
+    def make_triangle(data: List[str]):
+        for index in data:
+            index = index.split('/')
+            vert = (int(index[0])-1, int(index[1])-1)
+            if vert not in vertices_data:
+                vertices_data.append(vert)
+            triangles.append(vertices_data.index(vert))
+
+    obj_line_starters = {'v': get_position, 'vt': get_uvs, 'f': make_triangle}
+
+    with open(f"resources/blends/{model_name}.obj", 'rt') as model_obj:
+        for line in model_obj.readlines():
+            line = line.rstrip('\n')
+            line_data = line.split(' ')
+            if line_data[0] in obj_line_starters:
+                obj_line_starters[line_data[0]](line_data[1:])
+
+    with open(f"resources/blends/{model_name}.wt", 'rt') as model_weights:
+        for line in model_weights.readlines():
+            line = line.rstrip("\n").split("|")
+            joint_indices = tuple(map(int, line[0].split()))
+            joint_weights = tuple(map(float, line[1].split()))
+            vertex_weights.append((joint_indices, joint_weights))
+
+    vertices = []
+    for vertex, uv in vertices_data:
+        pos = vertex_positions[vertex][0]
+        depth = vertex_positions[vertex][1]
+        uv = vertex_uvs[uv]
+        indices = vertex_weights[vertex][0]
+        weights = vertex_weights[vertex][1]
+        vertices.append(Vertex(pos, depth, uv, indices, weights))
+
+    return MeshModel(model_name, vertices, triangles)

@@ -1,7 +1,7 @@
 import arcade
 
-from skinned_renderer import create_sample_prim_renderer, create_sample_sprite_renderer
-from model import create_sprite_model
+from skinned_renderer import create_sample_prim_renderer, create_sample_sprite_renderer, create_sample_mesh_renderer
+from model import load_mesh_model
 from clock import GAME_CLOCK
 from global_access import SCREEN_WIDTH, SCREEN_HEIGHT
 from lin_al import Vec2
@@ -24,6 +24,10 @@ class SampleScene(arcade.Window):
 
         self.test_sprite_renderer = create_sample_sprite_renderer()
 
+        self.test_mesh_renderer = create_sample_mesh_renderer(self.ctx)
+
+        load_mesh_model("robot")
+
     def on_update(self, delta_time: float):
         GAME_CLOCK.increment(delta_time)
 
@@ -38,6 +42,8 @@ class SampleScene(arcade.Window):
                          anchor_x='center', anchor_y='top', color=arcade.color.BLACK)
         self.test_sprite_renderer.find_render_data()
         self.test_sprite_renderer.draw()
+
+        self.test_mesh_renderer.draw()
 
         if not GAME_CLOCK.is_counting:
             arcade.draw_text(f"PAUSED - time elapsed since last pause: {GAME_CLOCK.concurrent_run_time}s",
@@ -58,3 +64,5 @@ class SampleScene(arcade.Window):
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         self.test_prim_entity.transform.scale += Vec2(scroll_y)
+        self.test_mesh_renderer.transform.scale += Vec2(scroll_y)
+        self.test_mesh_renderer.update_world_matrix()
