@@ -6,7 +6,7 @@ inspired by the book "Game Engine Design 2nd Edition" by Jason Gregory.
 # Aims
 joint tree structure rendered with arcade primitives. &#x2713;\
 joint tree structure linked to arcade.Sprites. &#x2713;\/
-vertex weighted joint system (openGl integration).\
+vertex weighted joint system (openGl integration). &#x2713;\
 effective data storage of animation clips which can be read from disk. &#x2713;\
 global clock animation system (global start times, non-integer sample rates, LERP animations). &#x2713;\
 Blending between animations, e.g., running to walking to standing.\
@@ -15,7 +15,7 @@ multi-animation blending (shooting while running, using blending to look left, r
 
 # Systems to build.
 Sprite Model. &#x2713;\
-Mesh Model.\
+Mesh Model. &#x2713;\
 Create different Windows. 
 * Sample Scene &#x2713;
 * Simple Animator &#x2713;
